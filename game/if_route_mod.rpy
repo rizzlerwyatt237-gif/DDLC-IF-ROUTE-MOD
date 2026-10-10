@@ -27,7 +27,7 @@ screen ifm_route_indicator():
             xalign 0.015
             yalign 0.02
             padding (10, 5)
-            background Solid("#111c")
+            background Solid("#111111cc")
             text "ROUTE: [ifm_route]":
                 size 18
                 color "#ffffff"
