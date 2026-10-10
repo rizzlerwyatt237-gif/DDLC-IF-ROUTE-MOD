@@ -12,4 +12,3 @@ screen if_route_mod_launcher():
             xalign 0.5
             yalign 0.94
             action Start("if_route_mod_start")
-            tooltip "Start DDLC IF Route Mod"
