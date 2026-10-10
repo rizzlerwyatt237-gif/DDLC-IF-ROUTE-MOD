@@ -12,11 +12,14 @@ Do not put the repository folder inside DDLC/game/.
 
 STARTING THE MOD
 ----------------
-The launcher redirects the built-in Start Game action to:
+Press the built-in Start Game button. The launcher starts label:
 
-    label if_route_mod_start
+    if_route_mod_start
 
-Press Start Game on DDLC's main menu to open the IF Route Archive.
+CHARACTERS
+----------
+The player character is named MC. The script uses classic DDLC sprite names
+(sayori, natsuki, yuri, monika) and DDLC-provided transforms from transforms.rpy.
+The image assets must remain part of your own DDLC installation.
 
-This is an unofficial fan mod. It contains original script code only and does
-not redistribute DDLC's original game files or assets.
+This unofficial fan mod does not redistribute DDLC's copyrighted game files.
