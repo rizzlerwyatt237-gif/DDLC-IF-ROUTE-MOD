@@ -11,10 +11,25 @@ define ifm_s = Character("Sayori")
 define ifm_n = Character("Natsuki")
 define ifm_y = Character("Yuri")
 
-default persistent.ifm_unlocked = []
+# Persistent records are initialized in an early init block for classic Ren'Py.
+init -2 python:
+    if not hasattr(persistent, "ifm_unlocked"):
+        persistent.ifm_unlocked = []
+    if not hasattr(persistent, "ifm_endings_seen"):
+        persistent.ifm_endings_seen = []
+    if not hasattr(persistent, "ifm_runs_started"):
+        persistent.ifm_runs_started = 0
+    if not hasattr(persistent, "ifm_last_route"):
+        persistent.ifm_last_route = ""
+    if not hasattr(persistent, "ifm_last_ending"):
+        persistent.ifm_last_ending = ""
+    if not hasattr(persistent, "ifm_pressure_last_run"):
+        persistent.ifm_pressure_last_run = 0
 default ifm_route = ""
 default ifm_route_active = False
 default ifm_day = 1
+default ifm_alive_count = 4
+default ifm_clues = 0
 default ifm_pressure = 0
 default ifm_trust = 0
 default ifm_bond_s = 0
@@ -42,6 +57,9 @@ screen ifm_route_indicator():
                     color "#ffffff"
                 text "DAY [ifm_day]  |  PRESSURE [ifm_pressure]":
                     size 11
+                    color "#dddddd"
+                text "CLUB [ifm_alive_count]/4  TRUST [ifm_trust]  CLUES [ifm_clues]":
+                    size 10
                     color "#dddddd"
 
 # Display every living girl with the correct DDLC layout transform. In DDLC's
@@ -106,6 +124,10 @@ label if_route_mod_start:
     $ ifm_route = ""
     $ ifm_route_active = True
     $ ifm_day = 1
+    $ ifm_alive_count = 4
+    $ ifm_clues = 0
+    $ persistent.ifm_runs_started += 1
+    $ persistent.ifm_last_route = ""
     $ ifm_pressure = 0
     $ ifm_trust = 0
     $ ifm_bond_s = 0
@@ -135,6 +157,10 @@ label ifm_intro:
     "Then you notice the classroom clock. Its hands are moving backwards."
     ifm_player "I want to get everyone out of this safely."
     ifm_m "Then choose what kind of person you'll become. The route you choose will shape every day after this."
+    if persistent.ifm_runs_started > 1:
+        "This is run [persistent.ifm_runs_started]. The notebook has a faint impression of a previous ending."
+        if persistent.ifm_last_ending:
+            "Last run: [persistent.ifm_last_route] — [persistent.ifm_last_ending]."
     "One warning appears in your notebook, written in handwriting that looks like your own:"
     "{i}There is no reset button inside this story. Keep going until everyone is gone, or someone ends your life.{/i}"
     jump ifm_route_select
@@ -147,35 +173,35 @@ label ifm_route_select:
             $ ifm_bond_m += 1
             ifm_player "I'll force the future to give me a different answer."
             ifm_m "Be careful. Determination can become a cage."
-            jump ifm_day1
+            jump ifm_route_prologue
         "Wrath IF — turn fear into retaliation":
             $ ifm_route = "Wrath IF"
             $ ifm_pressure += 2
             $ ifm_trust -= 1
             ifm_player "If this timeline wants a fight, it can have one."
             ifm_n "That's a terrible way to start a week."
-            jump ifm_day1
+            jump ifm_route_prologue
         "Sloth IF — escape the burden of choosing":
             $ ifm_route = "Sloth IF"
             $ ifm_bond_s += 1
             $ ifm_trust += 1
             ifm_player "Maybe the kindest thing is to stop forcing everything."
             ifm_s "Rest is okay. Giving up on people isn't the same thing."
-            jump ifm_day1
+            jump ifm_route_prologue
         "Greed IF — control every possible outcome":
             $ ifm_route = "Greed IF"
             $ ifm_pressure += 2
             $ ifm_bond_m += 1
             ifm_player "If I know every variable, nobody has to get hurt."
             ifm_m "You cannot calculate a heart like a math problem."
-            jump ifm_day1
+            jump ifm_route_prologue
         "Gluttony IF — learn every hidden truth":
             $ ifm_route = "Gluttony IF"
             $ ifm_pressure += 1
             $ ifm_bond_y += 1
             ifm_player "If I know what is really happening, I can fix it."
             ifm_y "Knowledge can be a light. It can also become a hunger."
-            jump ifm_day1
+            jump ifm_route_prologue
         "Lust IF — remake the bonds between everyone":
             $ ifm_route = "Lust IF"
             $ ifm_bond_s += 1
@@ -185,28 +211,28 @@ label ifm_route_select:
             $ ifm_trust += 1
             ifm_player "Maybe a different kind of connection can save us."
             ifm_s "Then please remember that we're people, not pieces on a board."
-            jump ifm_day1
+            jump ifm_route_prologue
         "Vainglory IF — become the only answer":
             $ ifm_route = "Vainglory IF"
             $ ifm_pressure += 2
             $ ifm_bond_m += 1
             ifm_player "I'll carry every burden myself."
             ifm_y "No one can carry the whole world without breaking."
-            jump ifm_day1
+            jump ifm_route_prologue
         "Aganau IF — keep moving after everything falls apart":
             $ ifm_route = "Aganau IF"
             $ ifm_pressure += 1
             $ ifm_trust += 1
             ifm_player "Even if I lose the way forward, I'll keep walking."
             ifm_n "Then don't walk so far ahead that we can't reach you."
-            jump ifm_day1
+            jump ifm_route_prologue
         "Rem IF — choose a quiet life with someone you trust":
             $ ifm_route = "Rem IF"
             $ ifm_bond_s += 2
             $ ifm_trust += 1
             ifm_player "Maybe a smaller, kinder future is still worth fighting for."
             ifm_s "I like that future. I just wish it were that easy."
-            jump ifm_day1
+            jump ifm_route_prologue
         "Butterfly Dream IF — believe one kind choice can change everything":
             $ ifm_route = "Butterfly Dream IF"
             $ ifm_bond_s += 1
@@ -216,14 +242,14 @@ label ifm_route_select:
             $ ifm_trust += 2
             ifm_player "One good decision can still matter, even here."
             ifm_m "Then keep making them when the decisions get harder."
-            jump ifm_day1
+            jump ifm_route_prologue
         "Tsugihagu IF — rebuild a self from broken memories":
             $ ifm_route = "Tsugihagu IF"
             $ ifm_pressure += 2
             $ ifm_bond_y += 1
             ifm_player "I'll put every memory back together, no matter what it costs."
             ifm_y "A memory is not the same thing as the person who lived it."
-            jump ifm_day1
+            jump ifm_route_prologue
         "School IF — try to live one ordinary school week":
             $ ifm_route = "School IF"
             $ ifm_trust += 2
@@ -233,11 +259,214 @@ label ifm_route_select:
             $ ifm_bond_m += 1
             ifm_player "Let's act like this can still be a normal week."
             ifm_n "That might be the weirdest plan anyone has suggested."
-            jump ifm_day1
+            jump ifm_route_prologue
 
 # ---------------------------------------------------------------------------
 # Day 1 — The club meeting
 # ---------------------------------------------------------------------------
+
+
+# Each IF route gets a signature opening choice. These scenes alter the run's
+# trust, clue count, relationship bonds, or pressure instead of being a label
+# pasted over the same story.
+label ifm_route_prologue:
+    if ifm_route == "Pride IF":
+        scene bg corridor
+        with dissolve
+        call ifm_show_survivors
+        "You stand in the corridor and swear that nobody else will disappear."
+        ifm_m "A promise can be brave. It can also become something you punish yourself with."
+        menu:
+            "Promise to protect everyone, no matter the cost":
+                $ ifm_pressure += 1
+                $ ifm_bond_m += 1
+                ifm_player "I'll find a way, even if it breaks me."
+            "Admit you need the others":
+                $ ifm_trust += 2
+                $ ifm_clues += 1
+                $ ifm_bond_s += 1
+                ifm_player "I can't do this alone."
+                ifm_s "Then don't make yourself."
+    elif ifm_route == "Wrath IF":
+        scene bg club_day
+        with dissolve
+        call ifm_show_survivors
+        "A sharp knock comes from inside the supply closet. Nobody is there when you open it."
+        ifm_n "You can't hit a problem until it tells you what it is."
+        menu:
+            "Kick the door until the sound stops":
+                $ ifm_pressure += 2
+                $ ifm_bond_n -= 1
+                ifm_player "I'm done being scared."
+                "The silence afterward feels worse than the knocking."
+            "Listen for the pattern":
+                $ ifm_clues += 2
+                $ ifm_trust += 1
+                ifm_player "Three knocks. Pause. Three more. It's repeating."
+                ifm_y "Then it may be trying to communicate."
+    elif ifm_route == "Sloth IF":
+        scene bg residential_day
+        with dissolve
+        call ifm_show_survivors
+        "For a moment you imagine leaving town and never opening the notebook again."
+        ifm_s "Rest is not the same thing as abandoning everyone."
+        menu:
+            "Make a small plan for tomorrow":
+                $ ifm_trust += 2
+                $ ifm_bond_s += 1
+                ifm_player "One day at a time. That's enough."
+            "Pretend this week will fix itself":
+                $ ifm_pressure += 1
+                $ ifm_clues -= 1
+                ifm_player "Maybe if I ignore it, it will go away."
+                "The clock ticks backward once."
+    elif ifm_route == "Greed IF":
+        scene bg classroom
+        with dissolve
+        call ifm_show_survivors
+        "You begin a chart: every choice, every outcome, every person who might be saved."
+        ifm_m "You have made them into numbers already."
+        menu:
+            "Keep the chart secret and optimise the plan":
+                $ ifm_pressure += 2
+                $ ifm_clues += 1
+                $ ifm_bond_m += 1
+                ifm_player "A plan only works if nobody interferes."
+            "Let the club see the chart":
+                $ ifm_trust += 2
+                $ ifm_clues += 1
+                ifm_player "If it's any good, it should survive questions."
+                ifm_y "Then we can test the assumptions together."
+    elif ifm_route == "Gluttony IF":
+        scene bg classroom
+        with dissolve
+        call ifm_show_survivors
+        "A sentence has been pencilled into the margin of every notebook in the room."
+        "Each sentence describes a memory that belongs to someone else."
+        ifm_y "Those are private memories. Somebody is looking through us."
+        menu:
+            "Read every page you can find":
+                $ ifm_clues += 2
+                $ ifm_pressure += 1
+                ifm_player "If the truth is written here, I have to know it."
+            "Close the notebooks and ask permission":
+                $ ifm_trust += 2
+                $ ifm_bond_y += 1
+                ifm_player "Your memories are yours. I won't take them."
+    elif ifm_route == "Lust IF":
+        scene bg club_day
+        with dissolve
+        call ifm_show_survivors
+        "All four girls describe the same dream: a festival that never ends."
+        ifm_s "In mine, we were all laughing. I woke up crying."
+        menu:
+            "Ask everyone to share what they remember":
+                $ ifm_trust += 2
+                $ ifm_bond_s += 1
+                $ ifm_bond_n += 1
+                $ ifm_bond_y += 1
+                $ ifm_bond_m += 1
+                $ ifm_clues += 1
+                ifm_player "Maybe the overlap is the clue."
+            "Tell them the dream is irrelevant":
+                $ ifm_pressure += 1
+                $ ifm_trust -= 1
+                ifm_player "We don't have time to dwell on dreams."
+    elif ifm_route == "Vainglory IF":
+        scene bg corridor
+        with dissolve
+        call ifm_show_survivors
+        "The glass of a framed class photograph reflects only you."
+        ifm_y "You are looking at the picture, but you are not in it."
+        menu:
+            "Insist you can handle this by yourself":
+                $ ifm_pressure += 2
+                $ ifm_bond_y -= 1
+                ifm_player "Someone has to be strong."
+            "Ask what the others can see":
+                $ ifm_trust += 2
+                $ ifm_clues += 1
+                ifm_player "Tell me honestly. What do you see?"
+                ifm_m "A person trying very hard not to ask for help."
+    elif ifm_route == "Aganau IF":
+        scene bg residential_day
+        with dissolve
+        call ifm_show_survivors
+        "You find a scrap of paper in your pocket, in your own handwriting: KEEP WALKING."
+        ifm_n "That advice is not very useful if you don't know where you're going."
+        menu:
+            "Follow the street until you find a new clue":
+                $ ifm_clues += 2
+                $ ifm_pressure += 1
+                "At the end of the street, a classroom bell rings from nowhere."
+            "Return to the club and tell everyone":
+                $ ifm_trust += 2
+                $ ifm_bond_n += 1
+                ifm_player "I don't want to make another decision alone."
+    elif ifm_route == "Rem IF":
+        scene bg residential_day
+        with dissolve
+        call ifm_show_survivors
+        "You picture an ordinary future: dinner, homework, and a club meeting that ends on time."
+        ifm_s "That sounds so simple. I wish simple things weren't so hard to hold on to."
+        menu:
+            "Promise to build that future together":
+                $ ifm_trust += 2
+                $ ifm_bond_s += 2
+                ifm_player "We'll make room for an ordinary day."
+            "Keep the dream private so it cannot be taken away":
+                $ ifm_bond_s += 1
+                $ ifm_pressure += 1
+                ifm_player "If I don't say it aloud, maybe it can stay safe."
+    elif ifm_route == "Butterfly Dream IF":
+        scene bg club_day
+        with dissolve
+        call ifm_show_survivors
+        "A paper butterfly rests on each club member's desk. None of them remembers folding it."
+        ifm_m "A tiny thing changed. Maybe that's how this began."
+        menu:
+            "Protect the butterflies and compare their folds":
+                $ ifm_clues += 2
+                $ ifm_trust += 1
+                ifm_player "The differences must matter."
+            "Leave them as a small act of kindness":
+                $ ifm_trust += 2
+                $ ifm_bond_s += 1
+                ifm_player "Not every mystery needs to be owned."
+    elif ifm_route == "Tsugihagu IF":
+        scene bg classroom
+        with dissolve
+        call ifm_show_survivors
+        "You discover a page filled with fragments of conversations that never happened."
+        ifm_y "It is like the world is trying to mend itself with the wrong pieces."
+        menu:
+            "Arrange the fragments into a timeline":
+                $ ifm_clues += 2
+                $ ifm_pressure += 1
+                ifm_player "If I can reconstruct what happened, I can stop it."
+            "Throw away the page before it rewrites your memories":
+                $ ifm_trust += 1
+                $ ifm_bond_y += 1
+                ifm_player "Some answers are not worth losing myself for."
+    elif ifm_route == "School IF":
+        scene bg club_day
+        with dissolve
+        call ifm_show_survivors
+        "You try to run the most normal club meeting imaginable."
+        ifm_n "We should vote on snacks before the universe ends."
+        menu:
+            "Let everyone choose an activity":
+                $ ifm_trust += 2
+                $ ifm_bond_s += 1
+                $ ifm_bond_n += 1
+                $ ifm_bond_y += 1
+                $ ifm_bond_m += 1
+                ifm_player "For once, nobody gets to be the hero. We just hang out."
+            "Inspect the clock while everyone is distracted":
+                $ ifm_clues += 2
+                $ ifm_pressure += 1
+                ifm_player "The second hand skips whenever someone says my name."
+    jump ifm_day1
 
 label ifm_day1:
     $ ifm_day = 1
@@ -366,6 +595,7 @@ label ifm_day3:
         "You search the familiar streets until the world becomes strangely quiet."
         "You find her ribbon on the ground. Sayori is gone, and the notebook has added a date beside her name."
         $ ifm_alive_s = False
+        $ ifm_alive_count -= 1
         hide sayori
         $ ifm_pressure += 1
     if not ifm_alive_s and not ifm_alive_n and not ifm_alive_y and not ifm_alive_m:
@@ -393,25 +623,28 @@ label ifm_day4:
 
         ifm_m "The festival is tomorrow in the notebook. The real festival isn't for weeks."
     menu:
-        "Stay with Natsuki and finish the decorations":
+        "Stay with Natsuki and finish the decorations" if ifm_alive_n:
             $ ifm_bond_n += 2
             $ ifm_trust += 1
             ifm_player "You shouldn't have to do everything on your own."
             ifm_n "I know. I'm just not used to people offering."
-        "Help Yuri examine the notebook's pattern":
+        "Help Yuri examine the notebook's pattern" if ifm_alive_y:
             $ ifm_bond_y += 2
             $ ifm_pressure += 1
             ifm_y "The dates are moving whenever we change our minds."
-        "Ask Monika to tell you the truth, even if it hurts":
+        "Ask Monika to tell you the truth, even if it hurts" if ifm_alive_m:
             $ ifm_bond_m += 1
             $ ifm_trust += 1
             ifm_m "I remember things that haven't happened yet. I can't explain why."
-        "Order everyone to follow your plan":
+        "Lay out a plan with whoever remains":
             $ ifm_pressure += 2
             $ ifm_trust -= 2
             $ ifm_bond_n -= 1
-            ifm_player "No more debate. We do exactly what I say."
-            ifm_n "You sound just like the notebook."
+            ifm_player "No more debate. We need a plan that we can all live with."
+            if ifm_alive_n:
+                ifm_n "You sound just like the notebook."
+            else:
+                "The empty chair makes the order sound crueler than you intended."
     if ifm_pressure >= 5 and ifm_alive_n and ifm_bond_n <= 1:
         scene bg club_day
         with fade
@@ -419,6 +652,7 @@ label ifm_day4:
         "You reach the door too late. The room is empty, the window is locked, and Natsuki's unfinished decorations lie on the floor."
         "Her name is crossed out in the notebook."
         $ ifm_alive_n = False
+        $ ifm_alive_count -= 1
         hide natsuki
         $ ifm_pressure += 1
     if not ifm_alive_s and not ifm_alive_n and not ifm_alive_y and not ifm_alive_m:
@@ -444,7 +678,7 @@ label ifm_day5:
         ifm_m "It wants us to stop making choices. It wants a fixed conclusion."
     ifm_player "Then we choose anyway."
     menu:
-        "Read Yuri's notes carefully and keep her company":
+        "Read Yuri's notes carefully and keep her company" if ifm_alive_y:
             $ ifm_bond_y += 2
             $ ifm_trust += 1
             ifm_player "You don't have to solve this alone."
@@ -460,20 +694,24 @@ label ifm_day5:
             $ ifm_bond_n += 1
             $ ifm_bond_y += 1
             $ ifm_bond_m += 1
-            ifm_m "Together, then. No more hidden decisions."
+            if ifm_alive_m:
+                ifm_m "Together, then. No more hidden decisions."
+            else:
+                "The remaining members agree to make the plan together."
         "Tell everyone to stop asking questions":
             $ ifm_pressure += 2
             $ ifm_trust -= 2
             $ ifm_bond_y -= 1
             ifm_player "Questions won't bring anyone back."
             ifm_y "But silence will not protect us either."
-    if ifm_pressure >= 6 and ifm_alive_y and ifm_bond_y <= 1:
+    if ifm_pressure >= 6 and ifm_alive_y and ifm_bond_y <= 1 and ifm_trust < 1:
         scene bg corridor
         with fade
         "You look away for only a moment."
         "When you turn back, Yuri is gone. Her notes are stacked neatly on a desk, as if she left to return in a minute."
         "No one ever sees her again. Her name has been crossed out."
         $ ifm_alive_y = False
+        $ ifm_alive_count -= 1
         hide yuri
         $ ifm_pressure += 1
     if not ifm_alive_s and not ifm_alive_n and not ifm_alive_y and not ifm_alive_m:
@@ -497,7 +735,7 @@ label ifm_day6:
         ifm_player "You knew this could happen?"
         ifm_m "I suspected. I was afraid that telling you would make it real."
     menu:
-        "Tell Monika that fear is not a reason to carry everything alone":
+        "Tell Monika that fear is not a reason to carry everything alone" if ifm_alive_m:
             $ ifm_bond_m += 2
             $ ifm_trust += 2
             ifm_player "You are part of the club, too. Let us help."
@@ -507,7 +745,10 @@ label ifm_day6:
             $ ifm_trust -= 2
             $ ifm_bond_m -= 2
             ifm_player "You had your chance. Now I decide."
-            ifm_m "That is exactly how it started."
+            if ifm_alive_m:
+                ifm_m "That is exactly how it started."
+            else:
+                "The room gives no answer to your declaration."
         "Burn the notebook and refuse to look back":
             $ ifm_pressure += 1
             $ ifm_trust += 1
@@ -520,14 +761,18 @@ label ifm_day6:
             $ ifm_bond_y += 1
             $ ifm_bond_m += 1
             ifm_player "I can stand beside you. I can't own your choices."
-            ifm_m "I wish I had heard that earlier."
-    if ifm_pressure >= 7 and ifm_alive_m and ifm_bond_m <= 1:
+            if ifm_alive_m:
+                ifm_m "I wish I had heard that earlier."
+            else:
+                "You wish Monika could have heard you say it."
+    if ifm_pressure >= 7 and ifm_alive_m and ifm_bond_m <= 1 and ifm_trust < 2:
         scene bg club_day
         with fade
         "The lights go out. When they return, Monika is no longer at the piano."
         "Her chair is pushed neatly under the table. On the black screen of the classroom computer, one sentence remains:"
         "{i}I tried to write a different ending.{/i}"
         $ ifm_alive_m = False
+        $ ifm_alive_count -= 1
         hide monika
         $ ifm_pressure += 1
     if not ifm_alive_s and not ifm_alive_n and not ifm_alive_y and not ifm_alive_m:
@@ -585,7 +830,10 @@ label ifm_day7:
             $ ifm_pressure += 2
             $ ifm_trust -= 1
             ifm_player "If there's a price, I'll pay it alone."
-            ifm_y "That promise may be impossible to keep."
+            if ifm_alive_y:
+                ifm_y "That promise may be impossible to keep."
+            else:
+                "You cannot tell whether that promise is courage or another form of fear."
     jump ifm_final_day
 
 # ---------------------------------------------------------------------------
@@ -623,7 +871,7 @@ label ifm_final_day:
             $ ifm_trust += 3
             ifm_player "I can't promise to save everyone. I can stop pretending I own your futures."
             "For the first time all week, no one speaks for several seconds."
-        "Ask Monika to choose the ending":
+        "Ask Monika to choose the ending" if ifm_alive_m:
             $ ifm_bond_m += 2
             $ ifm_trust += 1
             ifm_player "You have been trying to carry this story. What do you choose?"
@@ -642,6 +890,7 @@ label ifm_final_day:
     # With a broken level of trust or overwhelming pressure, a surviving girl
     # makes the final lethal choice. The script picks someone who is still alive.
     if ifm_trust <= 0 or ifm_pressure >= 9:
+
         if ifm_alive_m and (ifm_route == "Pride IF" or ifm_route == "Greed IF" or ifm_route == "Vainglory IF" or ifm_bond_m >= ifm_bond_s and ifm_bond_m >= ifm_bond_n and ifm_bond_m >= ifm_bond_y):
             $ ifm_final_killer = "Monika"
             show monika 1a at t11 zorder 3
@@ -679,6 +928,14 @@ label ifm_final_day:
         $ ifm_player_alive = False
         jump ifm_player_killed
 
+    # Enough clues reveal what the notebook is doing, but knowledge cannot
+    # prevent the terminal outcome in this route. It changes what MC understands.
+    if ifm_clues >= 5:
+        "At last, you understand the pattern: the notebook was recording the choices that everyone hoped would not count."
+        "You know why the week happened. You still cannot make the people you love immune to its ending."
+    else:
+        "You never discover who first wrote the notebook. The final page does not wait for an answer."
+
     # If the group still trusts you, the timeline takes the club instead.
     # There is no hidden third ending or return-to-hub option.
     if ifm_alive_s:
@@ -686,24 +943,28 @@ label ifm_final_day:
         ifm_s "I wanted us to have more time."
         "Sayori's voice fades. Her ribbon falls to the floor, untouched."
         $ ifm_alive_s = False
+        $ ifm_alive_count -= 1
         hide sayori
     if ifm_alive_n:
 
         ifm_n "Don't let anyone forget that we were here."
         "Natsuki's chair stands empty before you can answer."
         $ ifm_alive_n = False
+        $ ifm_alive_count -= 1
         hide natsuki
     if ifm_alive_y:
 
         ifm_y "Perhaps the last page was never meant to be read."
         "Yuri's book closes by itself. The room grows quiet."
         $ ifm_alive_y = False
+        $ ifm_alive_count -= 1
         hide yuri
     if ifm_alive_m:
 
         ifm_m "Thank you for staying until the end."
         "Monika looks at you as the classroom lights fade away."
         $ ifm_alive_m = False
+        $ ifm_alive_count -= 1
         hide monika
     jump ifm_all_girls_dead
 
@@ -721,6 +982,11 @@ label ifm_player_killed:
     "The timeline ends with you. There is no route hub after this, and this run cannot continue."
     if ifm_route not in persistent.ifm_unlocked:
         $ persistent.ifm_unlocked.append(ifm_route)
+    $ persistent.ifm_last_route = ifm_route
+    $ persistent.ifm_last_ending = "[ifm_final_killer] killed MC"
+    if persistent.ifm_last_ending not in persistent.ifm_endings_seen:
+        $ persistent.ifm_endings_seen.append(persistent.ifm_last_ending)
+    $ persistent.ifm_pressure_last_run = ifm_pressure
     "Route recorded: [ifm_route]"
     return
 
@@ -734,5 +1000,10 @@ label ifm_all_girls_dead:
     "The notebook closes. For the first time, it has nothing left to predict."
     if ifm_route not in persistent.ifm_unlocked:
         $ persistent.ifm_unlocked.append(ifm_route)
+    $ persistent.ifm_last_route = ifm_route
+    $ persistent.ifm_last_ending = "All four girls died"
+    if persistent.ifm_last_ending not in persistent.ifm_endings_seen:
+        $ persistent.ifm_endings_seen.append(persistent.ifm_last_ending)
+    $ persistent.ifm_pressure_last_run = ifm_pressure
     "Route recorded: [ifm_route]"
     return
