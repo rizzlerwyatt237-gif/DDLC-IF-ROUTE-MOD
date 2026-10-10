@@ -5,7 +5,7 @@
 # Story rule: this run does not return to a route hub. It reaches an ending
 # only when all four club girls have died or one of them kills the Player.
 
-define ifm_player = Character("Player")
+define ifm_player = Character("MC")
 define ifm_m = Character("Monika")
 define ifm_s = Character("Sayori")
 define ifm_n = Character("Natsuki")
@@ -44,6 +44,61 @@ screen ifm_route_indicator():
                     size 11
                     color "#dddddd"
 
+
+# Display every living girl with the correct DDLC layout transform. In DDLC's
+# transforms.rpy, t11 is the one-person layout, t21/t22 are for two, t31-t33
+# are for three, and t41-t44 are for four characters. Keeping the layout count
+# consistent prevents sprites from being oversized or pushed off-screen.
+label ifm_show_survivors:
+    if ifm_alive_s and ifm_alive_n and ifm_alive_y and ifm_alive_m:
+        show sayori 1a at t41 zorder 2
+        show natsuki 1a at t42 zorder 2
+        show yuri 1a at t43 zorder 2
+        show monika 1a at t44 zorder 2
+    elif ifm_alive_s and ifm_alive_n and ifm_alive_y:
+        show sayori 1a at t31 zorder 2
+        show natsuki 1a at t32 zorder 2
+        show yuri 1a at t33 zorder 2
+    elif ifm_alive_s and ifm_alive_n and ifm_alive_m:
+        show sayori 1a at t31 zorder 2
+        show natsuki 1a at t32 zorder 2
+        show monika 1a at t33 zorder 2
+    elif ifm_alive_s and ifm_alive_y and ifm_alive_m:
+        show sayori 1a at t31 zorder 2
+        show yuri 1a at t32 zorder 2
+        show monika 1a at t33 zorder 2
+    elif ifm_alive_n and ifm_alive_y and ifm_alive_m:
+        show natsuki 1a at t31 zorder 2
+        show yuri 1a at t32 zorder 2
+        show monika 1a at t33 zorder 2
+    elif ifm_alive_s and ifm_alive_n:
+        show sayori 1a at t21 zorder 2
+        show natsuki 1a at t22 zorder 2
+    elif ifm_alive_s and ifm_alive_y:
+        show sayori 1a at t21 zorder 2
+        show yuri 1a at t22 zorder 2
+    elif ifm_alive_s and ifm_alive_m:
+        show sayori 1a at t21 zorder 2
+        show monika 1a at t22 zorder 2
+    elif ifm_alive_n and ifm_alive_y:
+        show natsuki 1a at t21 zorder 2
+        show yuri 1a at t22 zorder 2
+    elif ifm_alive_n and ifm_alive_m:
+        show natsuki 1a at t21 zorder 2
+        show monika 1a at t22 zorder 2
+    elif ifm_alive_y and ifm_alive_m:
+        show yuri 1a at t21 zorder 2
+        show monika 1a at t22 zorder 2
+    elif ifm_alive_s:
+        show sayori 1a at t11 zorder 2
+    elif ifm_alive_n:
+        show natsuki 1a at t11 zorder 2
+    elif ifm_alive_y:
+        show yuri 1a at t11 zorder 2
+    elif ifm_alive_m:
+        show monika 1a at t11 zorder 2
+    return
+
 # ---------------------------------------------------------------------------
 # New run and the point of no return
 # ---------------------------------------------------------------------------
@@ -64,16 +119,18 @@ label if_route_mod_start:
     $ ifm_alive_m = True
     $ ifm_player_alive = True
     $ ifm_final_killer = "Monika"
+    show monika 1a at t11 zorder 3
     show screen ifm_route_indicator
     jump ifm_intro
 
 label ifm_intro:
     scene bg classroom
     with dissolve
-    show sayori 1a at t21
-    show monika 1a at t11
-    show natsuki 1a at t31
-    show yuri 1a at t33
+    call ifm_show_survivors
+
+
+
+
     ifm_m "Everyone, listen up. Something has changed about this week."
     ifm_s "It still feels like a normal school day to me."
     ifm_y "That is often what makes a frightening thing so difficult to notice."
@@ -190,10 +247,11 @@ label ifm_day1:
     $ ifm_day = 1
     scene bg club_day
     with dissolve
-    show sayori 1a at t21
-    show monika 1a at t11
-    show natsuki 1a at t31
-    show yuri 1a at t33
+    call ifm_show_survivors
+
+
+
+
     ifm_m "Today, we're writing poems. No arguments, no panic, just the club."
     ifm_s "And snacks! We can't forget snacks."
     ifm_n "I already made them. Don't touch anything until I say so."
@@ -228,19 +286,20 @@ label ifm_day2:
     $ ifm_pressure += 1
     scene bg club_day
     with dissolve
+    call ifm_show_survivors
     ifm_player "This poem wasn't here yesterday."
-    show monika 1a at t11
+
     ifm_m "Let me see it."
     ifm_m "..."
     ifm_m "I didn't write that."
     if ifm_alive_s:
-        show sayori 1a at t21
+
         ifm_s "It says we're going to argue. So let's just not argue!"
     if ifm_alive_n:
-        show natsuki 1a at t31
+
         ifm_n "That is not how writing works. Someone is messing with us."
     if ifm_alive_y:
-        show yuri 1a at t33
+
         ifm_y "The last line is written in the future tense. That should be impossible."
     menu:
         "Read it aloud and tell the truth about being scared":
@@ -277,12 +336,13 @@ label ifm_day3:
     $ ifm_pressure += 1
     scene bg corridor
     with dissolve
-    show monika 1a at t11
+    call ifm_show_survivors
+
     ifm_m "I found a notebook in the supply closet. It has all our names in it."
     ifm_m "Some are crossed out. Some are not."
     ifm_player "Then we stay together. Nobody goes anywhere alone."
     if ifm_alive_s:
-        show sayori 1a at t21
+
         ifm_s "I don't like this. Can we please go somewhere bright?"
     menu:
         "Open the notebook and read every page":
@@ -328,15 +388,16 @@ label ifm_day4:
     $ ifm_pressure += 1
     scene bg club_day
     with dissolve
+    call ifm_show_survivors
     ifm_player "We have to keep the club going. If we stop, the notebook wins."
     if ifm_alive_n:
-        show natsuki 1a at t31
+
         ifm_n "Don't turn this into a contest. We're people, not a project."
     if ifm_alive_y:
-        show yuri 1a at t33
+
         ifm_y "Perhaps the pattern feeds on our fear of losing control."
     if ifm_alive_m:
-        show monika 1a at t11
+
         ifm_m "The festival is tomorrow in the notebook. The real festival isn't for weeks."
     menu:
         "Stay with Natsuki and finish the decorations":
@@ -380,12 +441,13 @@ label ifm_day5:
     $ ifm_pressure += 1
     scene bg classroom
     with dissolve
+    call ifm_show_survivors
     if ifm_alive_y:
-        show yuri 1a at t33
+
         ifm_y "I found notes hidden in the margins. Each time someone is lost, the same sentence appears."
         ifm_y "{i}The story is trying to reach its ending.{/i}"
     if ifm_alive_m:
-        show monika 1a at t11
+
         ifm_m "It wants us to stop making choices. It wants a fixed conclusion."
     ifm_player "Then we choose anyway."
     menu:
@@ -434,8 +496,9 @@ label ifm_day6:
     $ ifm_pressure += 1
     scene bg club_day
     with dissolve
+    call ifm_show_survivors
     if ifm_alive_m:
-        show monika 1a at t11
+
         ifm_m "I have been hearing the next line before any of us speaks."
         ifm_m "Every time I try to change it, something else breaks."
         ifm_player "You knew this could happen?"
@@ -487,21 +550,22 @@ label ifm_day7:
     $ ifm_pressure += 1
     scene bg classroom
     with dissolve
+    call ifm_show_survivors
     "The morning bell rings."
     "For a heartbeat, you think the week has finally reset."
     "Then you see the same notebook on your desk. The date is tomorrow's date, crossed out and rewritten again."
     ifm_player "We are trapped in the last page."
     if ifm_alive_s:
-        show sayori 1a at t21
+
         ifm_s "I don't want to forget everyone."
     if ifm_alive_n:
-        show natsuki 1a at t31
+
         ifm_n "I don't want to be written out of my own life."
     if ifm_alive_y:
-        show yuri 1a at t33
+
         ifm_y "Then we must decide what matters more than the ending."
     if ifm_alive_m:
-        show monika 1a at t11
+
         ifm_m "One day remains. No more pages after that."
     menu:
         "Tell the remaining girls you trust them, even though you're terrified":
@@ -540,20 +604,21 @@ label ifm_final_day:
     $ ifm_pressure += 1
     scene bg club_day
     with dissolve
+    call ifm_show_survivors
     "The classroom windows show a night sky, though the clock says it is morning."
     "The notebook lies open on the teacher's desk. There is only one blank line left."
     ifm_player "I need to know. Is there a way for all of us to leave this room alive?"
     if ifm_alive_s:
-        show sayori 1a at t21
+
         ifm_s "I want that more than anything."
     if ifm_alive_n:
-        show natsuki 1a at t31
+
         ifm_n "Then don't pretend the cost doesn't matter."
     if ifm_alive_y:
-        show yuri 1a at t33
+
         ifm_y "A story can be changed. But a choice still has consequences."
     if ifm_alive_m:
-        show monika 1a at t11
+
         ifm_m "This is the last choice. Whatever comes next, it will be real to us."
     menu:
         "Try to force the notebook to obey you":
@@ -586,27 +651,33 @@ label ifm_final_day:
     if ifm_trust <= 0 or ifm_pressure >= 9:
         if ifm_alive_m and (ifm_route == "Pride IF" or ifm_route == "Greed IF" or ifm_route == "Vainglory IF" or ifm_bond_m >= ifm_bond_s and ifm_bond_m >= ifm_bond_n and ifm_bond_m >= ifm_bond_y):
             $ ifm_final_killer = "Monika"
-            show monika 1a at t11
+            show monika 1a at t11 zorder 3
+
             ifm_m "I wanted a different ending. I can't let you tear apart what remains."
         elif ifm_alive_s and (ifm_route == "Sloth IF" or ifm_route == "Rem IF" or ifm_route == "Butterfly Dream IF" or ifm_bond_s >= ifm_bond_n and ifm_bond_s >= ifm_bond_y):
             $ ifm_final_killer = "Sayori"
-            show sayori 1a at t21
+            show sayori 1a at t11 zorder 3
+
             ifm_s "I'm sorry. I can't let this keep happening to everyone."
         elif ifm_alive_n:
             $ ifm_final_killer = "Natsuki"
-            show natsuki 1a at t31
+            show natsuki 1a at t11 zorder 3
+
             ifm_n "I begged you to listen. I can't let you hurt anyone else."
         elif ifm_alive_y:
             $ ifm_final_killer = "Yuri"
-            show yuri 1a at t33
+            show yuri 1a at t11 zorder 3
+
             ifm_y "There is no kindness in letting this continue."
         elif ifm_alive_m:
             $ ifm_final_killer = "Monika"
-            show monika 1a at t11
+            show monika 1a at t11 zorder 3
+
             ifm_m "I am sorry. There is nothing left I can change."
         elif ifm_alive_s:
             $ ifm_final_killer = "Sayori"
-            show sayori 1a at t21
+            show sayori 1a at t11 zorder 3
+
             ifm_s "I'm sorry. I thought we could find another way."
         else:
             jump ifm_all_girls_dead
@@ -618,25 +689,25 @@ label ifm_final_day:
     # If the group still trusts you, the timeline takes the club instead.
     # There is no hidden third ending or return-to-hub option.
     if ifm_alive_s:
-        show sayori 1a at t21
+
         ifm_s "I wanted us to have more time."
         "Sayori's voice fades. Her ribbon falls to the floor, untouched."
         $ ifm_alive_s = False
         hide sayori
     if ifm_alive_n:
-        show natsuki 1a at t31
+
         ifm_n "Don't let anyone forget that we were here."
         "Natsuki's chair stands empty before you can answer."
         $ ifm_alive_n = False
         hide natsuki
     if ifm_alive_y:
-        show yuri 1a at t33
+
         ifm_y "Perhaps the last page was never meant to be read."
         "Yuri's book closes by itself. The room grows quiet."
         $ ifm_alive_y = False
         hide yuri
     if ifm_alive_m:
-        show monika 1a at t11
+
         ifm_m "Thank you for staying until the end."
         "Monika looks at you as the classroom lights fade away."
         $ ifm_alive_m = False
