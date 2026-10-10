@@ -3,264 +3,220 @@
 # Install into the game/ directory of a compatible DDLC/Monika After Story-style
 # Ren'Py mod project or a DDLC Mod Template project.
 
-label if_route_mod_start:
-    scene bg club_day
+define ifm_player = Character("Player")
+define ifm_m = Character("Monika")
+define ifm_s = Character("Sayori")
+define ifm_n = Character("Natsuki")
+define ifm_y = Character("Yuri")
+
+default ifm_unlocked = []
+default ifm_route = ""
+default ifm_route_active = False
+
+def screen ifm_route_indicator():
+    if ifm_route_active and ifm_route:
+        frame:
+            xalign 0.015
+            yalign 0.02
+            padding (10, 5)
+            background Solid("#111c")
+            text "ROUTE: [ifm_route]":
+                size 18
+                color "#ffffff"
+
+init python:
+    if "ifm_route_indicator" not in config.overlay_screens:
+        config.overlay_screens.append("ifm_route_indicator")
+
+label if_route_mod:
+    $ ifm_route_active = False
+    scene black
     with dissolve
+    centered "DDLC IF ROUTE MOD"
+    "A branching alternate-timeline fan story inspired by the IF-route concept of Re:Zero."
+    jump ifm_hub
 
-    s "Something feels different today."
-    m "Different?"
-    s "Like we're standing at the beginning of a story we've already lived."
-    n "The thought should have been impossible."
-    n "But somehow, it felt familiar."
-
-    $ if_route_mod_setup()
-
-    if persistent.if_route_mod_completed:
-        jump if_route_hub
-
-    menu:
-        "Follow the choice that feels right":
-            jump if_route_choice
-        "Turn away from the strange feeling":
-            jump if_route_normal_intro
-
-label if_route_normal_intro:
-    n "For one quiet afternoon, nobody questioned anything."
-    s "Maybe not every story needs to be complicated."
-    m "That's a nice thought."
-    n "But the strange feeling never completely disappeared."
-    n "THE END — THE UNCHOSEN TIMELINE"
-    return
-
-label if_route_choice:
-    m "If you could change one decision you've already made... would you?"
-
-    menu:
-        "Refuse to accept anyone else's rules":
-            $ if_route_mod_set_route("pride")
-            jump if_route_pride
-        "Protect everyone, even if they hate you for it":
-            $ if_route_mod_set_route("wrath")
-            jump if_route_wrath
-        "Stop fighting and choose the quiet life":
-            $ if_route_mod_set_route("sloth")
-            jump if_route_sloth
-        "Make every possible outcome work":
-            $ if_route_mod_set_route("greed")
-            jump if_route_greed
-        "Learn everything, even what should remain unknown":
-            $ if_route_mod_set_route("gluttony")
-            jump if_route_gluttony
-        "Put every relationship above the original story":
-            $ if_route_mod_set_route("lust")
-            jump if_route_lust
-        "Become the person everyone believes you should be":
-            $ if_route_mod_set_route("vainglory")
-            jump if_route_vainglory
-        "Treat this like an ordinary school day":
-            $ if_route_mod_set_route("school")
-            jump if_route_school
-
-label if_route_hub:
-    scene bg club_day
+label ifm_hub:
+    $ ifm_route_active = False
+    scene black
     with dissolve
-    m "Welcome back to the IF Route Archive."
-    m "Every route is a different answer to the same question: what happens when one choice changes everything?"
-
+    ifm_m "Welcome to the IF Route Archive."
+    ifm_m "Every choice can create a different timeline."
     menu:
-        "Pride IF":
-            jump if_route_pride
-        "Wrath IF":
-            jump if_route_wrath
-        "Sloth IF":
-            jump if_route_sloth
-        "Greed IF":
-            jump if_route_greed
-        "Gluttony IF":
-            jump if_route_gluttony
-        "Lust IF":
-            jump if_route_lust
-        "Vainglory IF":
-            jump if_route_vainglory
-        "School IF":
-            jump if_route_school
+        "Start a new timeline":
+            jump ifm_choose
+        "Replay an unlocked route" if len(ifm_unlocked) > 0:
+            jump ifm_replay
         "Leave the archive":
             return
 
-label if_route_pride:
-    scene bg club_day
-    with dissolve
-    m "Pride IF."
-    n "You decide that nobody gets to write your future for you."
-    s "You don't have to prove you're stronger than everyone else."
-    m "Maybe I do."
-    n "Every warning becomes a challenge. Every disagreement becomes evidence that you must be right."
+label ifm_choose:
+    ifm_player "Which path should I take?"
     menu:
-        "Admit that you were wrong":
-            n "For the first time, the timeline bends without breaking."
-            n "Pride does not disappear. It becomes something you can control."
-            jump if_route_good_end
-        "Double down":
-            n "The club becomes a stage, and everyone else becomes an audience."
-            n "When nobody is left to argue with, victory feels exactly like loneliness."
-            jump if_route_dark_end
+        "Pride IF — Refuse to give up":
+            $ ifm_route = "Pride IF"
+            jump ifm_pride
+        "Wrath IF — Strike back":
+            $ ifm_route = "Wrath IF"
+            jump ifm_wrath
+        "Sloth IF — Take the easy way":
+            $ ifm_route = "Sloth IF"
+            jump ifm_sloth
+        "Greed IF — Control every outcome":
+            $ ifm_route = "Greed IF"
+            jump ifm_greed
+        "Gluttony IF — Take what you cannot bear to lose":
+            $ ifm_route = "Gluttony IF"
+            jump ifm_gluttony
+        "Lust IF — Rewrite the bonds between everyone":
+            $ ifm_route = "Lust IF"
+            jump ifm_lust
+        "Vainglory IF — Become the answer":
+            $ ifm_route = "Vainglory IF"
+            jump ifm_vainglory
+        "School IF — A different school day":
+            $ ifm_route = "School IF"
+            jump ifm_school
 
-label if_route_wrath:
-    scene bg club_day
-    with dissolve
-    m "Wrath IF."
-    n "You decide that protecting people means deciding who deserves your trust."
-    y "You can't keep treating every disagreement like a threat."
-    n "But fear is persuasive when it calls itself protection."
+label ifm_pride:
+    $ ifm_route_active = True
+    scene black
+    ifm_m "You decided that losing was unacceptable."
+    ifm_player "Then I'll keep going. Even if everyone tells me to stop."
+    ifm_s "But what if your determination hurts someone?"
     menu:
+        "Push forward anyway":
+            ifm_m "That's the Pride timeline."
+            ifm_player "I will be the one who decides what happens."
+        "Admit you need help":
+            ifm_s "Maybe refusing to lose doesn't mean refusing everyone."
+            ifm_player "Maybe this timeline can change."
+    jump ifm_finish
+
+label ifm_wrath:
+    $ ifm_route_active = True
+    scene black
+    ifm_player "If nobody will protect the club, I will."
+    ifm_y "Protection can become another word for control."
+    menu:
+        "Confront everyone":
+            ifm_player "Then let them know I won't back down."
         "Lower your guard":
-            n "You finally tell the others what you were afraid would happen."
-            n "They don't fix everything. They simply stay."
-            jump if_route_good_end
-        "Trust nobody":
-            n "The walls become taller. Then thicker. Then permanent."
-            n "You protected everyone from danger by becoming the danger nobody could reach."
-            jump if_route_dark_end
+            ifm_n "You don't have to fight every battle."
+    jump ifm_finish
 
-label if_route_sloth:
-    scene bg residential_day
-    with dissolve
-    m "Sloth IF."
-    n "You choose the path with the least resistance."
-    s "Maybe that's not always a bad thing."
-    n "For a while, it isn't."
-    n "Homework waits. Problems wait. Tomorrow waits."
+label ifm_sloth:
+    $ ifm_route_active = True
+    scene black
+    ifm_s "You could just leave everything alone."
+    ifm_player "Maybe that's easier."
     menu:
-        "Get up and face tomorrow":
-            n "Rest becomes recovery instead of escape."
-            jump if_route_good_end
-        "Stay where nothing can change":
-            n "The timeline doesn't end with a catastrophe."
-            n "It simply stops moving."
-            jump if_route_dark_end
+        "Walk away":
+            ifm_m "The timeline continues without you."
+        "Turn back":
+            ifm_player "No. I can't pretend I didn't see it."
+    jump ifm_finish
 
-label if_route_greed:
-    scene bg club_day
-    with dissolve
-    m "Greed IF."
-    n "You refuse to accept a future where anyone has to lose."
-    m "Then I'll find a way for everybody to win."
-    n "One plan becomes ten. Ten become a hundred."
-    n "Soon, every person is a variable and every conversation is a calculation."
+label ifm_greed:
+    $ ifm_route_active = True
+    scene black
+    ifm_m "You want every possibility to end the way you choose."
+    ifm_player "If I plan enough, nobody has to get hurt."
     menu:
-        "Accept that some things cannot be controlled":
-            n "You stop trying to own every possible future."
-            jump if_route_good_end
-        "Control every variable":
-            n "You get exactly what you wanted: a perfect plan."
-            n "Nobody is happy inside it."
-            jump if_route_dark_end
+        "Control everything":
+            ifm_m "And what happens when something refuses to be controlled?"
+        "Accept uncertainty":
+            ifm_player "I can't save every possible future."
+    jump ifm_finish
 
-label if_route_gluttony:
-    scene bg club_day
-    with dissolve
-    m "Gluttony IF."
-    n "You become obsessed with knowing every hidden answer."
-    y "Some memories aren't yours to take."
-    n "But curiosity can become hunger."
+label ifm_gluttony:
+    $ ifm_route_active = True
+    scene black
+    ifm_y "What makes someone themselves? Their memories? Their choices?"
+    ifm_player "If I knew everything, maybe I could fix everything."
     menu:
-        "Stop reading the lives of others":
-            n "You choose people over information."
-            jump if_route_good_end
-        "Keep consuming every secret":
-            n "Names blur. Memories overlap."
-            n "You know everything except which thoughts are truly yours."
-            jump if_route_dark_end
+        "Take the memories":
+            ifm_y "Knowledge can become another kind of hunger."
+        "Leave them untouched":
+            ifm_player "Some things shouldn't belong to me."
+    jump ifm_finish
 
-label if_route_lust:
-    scene bg club_day
-    with dissolve
-    m "Lust IF."
-    n "In this timeline, connection becomes the force that changes the story."
-    s "Then let's stop pretending people are pieces on a board."
-    n "Friendship, affection, jealousy, and trust pull the timeline in directions nobody predicted."
+label ifm_lust:
+    $ ifm_route_active = True
+    scene black
+    ifm_s "What if every relationship in the club changed?"
+    ifm_player "Then we'd have to learn who we are all over again."
     menu:
-        "Respect everyone's choice":
-            n "Love becomes something freely given instead of something possessed."
-            jump if_route_good_end
-        "Force the perfect relationship":
-            n "The perfect relationship becomes a cage."
-            jump if_route_dark_end
+        "Rewrite the bonds":
+            ifm_m "A completely different timeline begins."
+        "Keep the bonds":
+            ifm_player "Changing people isn't the same as saving them."
+    jump ifm_finish
 
-label if_route_vainglory:
-    scene bg club_day
-    with dissolve
-    m "Vainglory IF."
-    n "You become obsessed with the version of yourself that everyone else applauds."
-    s "Who are you when nobody is watching?"
-    n "The question hurts more than any insult."
+label ifm_vainglory:
+    $ ifm_route_active = True
+    scene black
+    ifm_m "You believe you can become the answer to every problem."
+    ifm_player "Someone has to be the hero."
     menu:
-        "Answer honestly":
-            n "You let the mask fall."
-            jump if_route_good_end
-        "Become the perfect version":
-            n "The applause never stops. Neither does the performance."
-            jump if_route_dark_end
+        "Take the role":
+            ifm_m "Then everyone will look to you."
+        "Reject the pedestal":
+            ifm_player "I'm just one person."
+    jump ifm_finish
 
-label if_route_school:
-    scene bg club_day
-    with dissolve
-    n "School IF."
-    n "No world-ending prophecy. No impossible destiny. Just a clubroom after classes."
-    s "Honestly? I could get used to this."
+label ifm_school:
+    $ ifm_route_active = True
+    scene black
+    ifm_s "Welcome to a completely different school day!"
+    ifm_n "No ominous timelines. Hopefully."
+    ifm_y "That sounded ominous."
     menu:
-        "Enjoy the ordinary day":
-            n "For once, the alternate timeline is allowed to be happy."
-            jump if_route_good_end
-        "Look for the hidden timeline":
-            n "Even an ordinary school day can hide a door."
-            n "You open it."
-            jump if_route_archive_end
+        "Enjoy the normal day":
+            ifm_player "Let's just have fun."
+        "Look for the anomaly":
+            ifm_m "You noticed it too, didn't you?"
+    jump ifm_finish
 
-label if_route_good_end:
-    scene bg club_day
-    with dissolve
-    n "The timeline changes, but it doesn't have to destroy everything."
-    m "Maybe an IF route isn't about finding the correct answer."
-    m "Maybe it's about seeing what every answer costs."
-    $ if_route_mod_complete()
-    n "ROUTE CLEAR — HOPEFUL TIMELINE"
-    jump if_route_archive_end
+label ifm_finish:
+    if ifm_route not in ifm_unlocked:
+        $ ifm_unlocked.append(ifm_route)
+    $ ifm_route_active = False
+    scene black
+    with fade
+    centered "{size=+12}[ifm_route]{/size}\n\nTIMELINE RECORDED"
+    "Route unlocked: [ifm_route]"
+    "The choice is now saved in this playthrough."
+    jump ifm_hub
 
-label if_route_dark_end:
-    scene bg club_day
-    with dissolve
-    n "The choice has consequences."
-    n "The timeline continues without you seeing what could have happened differently."
-    $ if_route_mod_complete()
-    n "ROUTE CLEAR — BROKEN TIMELINE"
-    jump if_route_archive_end
-
-label if_route_archive_end:
-    scene bg club_day
-    with dissolve
-    m "The route has been recorded."
-    m "You can return to the archive and see another possibility."
-    menu:
-        "Return to IF Route Archive":
-            jump if_route_hub
-        "End this session":
-            return
-
-init python:
-    def if_route_mod_setup():
-        if not hasattr(persistent, "if_route_mod_completed"):
-            persistent.if_route_mod_completed = False
-        if not hasattr(persistent, "if_route_mod_routes"):
-            persistent.if_route_mod_routes = []
-
-    def if_route_mod_set_route(route_name):
-        persistent.if_route_mod_current = route_name
-
-    def if_route_mod_complete():
-        persistent.if_route_mod_completed = True
-        route_name = getattr(persistent, "if_route_mod_current", "unknown")
-        routes = getattr(persistent, "if_route_mod_routes", [])
-        if route_name not in routes:
-            routes.append(route_name)
-        persistent.if_route_mod_routes = routes
+label ifm_replay:
+    scene black
+    "Unlocked timelines:"
+    $ replay_choice = None
+    python:
+        replay_choice = renpy.display_menu([(r, r) for r in ifm_unlocked])
+    if replay_choice == "Pride IF":
+        $ ifm_route = replay_choice
+        jump ifm_pride
+    if replay_choice == "Wrath IF":
+        $ ifm_route = replay_choice
+        jump ifm_wrath
+    if replay_choice == "Sloth IF":
+        $ ifm_route = replay_choice
+        jump ifm_sloth
+    if replay_choice == "Greed IF":
+        $ ifm_route = replay_choice
+        jump ifm_greed
+    if replay_choice == "Gluttony IF":
+        $ ifm_route = replay_choice
+        jump ifm_gluttony
+    if replay_choice == "Lust IF":
+        $ ifm_route = replay_choice
+        jump ifm_lust
+    if replay_choice == "Vainglory IF":
+        $ ifm_route = replay_choice
+        jump ifm_vainglory
+    if replay_choice == "School IF":
+        $ ifm_route = replay_choice
+        jump ifm_school
+    jump ifm_hub
