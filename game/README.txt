@@ -1,15 +1,22 @@
 DDLC IF ROUTE MOD - GAME FILES
 
-Copy if_route_mod.rpy into the game directory of your DDLC mod project.
+INSTALL
+-------
+Copy BOTH of these files directly into the game/ folder of a legally obtained
+classic DDLC installation:
 
-ENTRY POINT
------------
-The playable entry point is:
+    if_route_mod.rpy
+    if_route_launcher.rpy
 
-    jump if_route_mod_start
+Do not put the repository folder inside DDLC/game/.
 
-Call that label from your mod's start flow when you want the IF Route Mod to begin.
+STARTING THE MOD
+----------------
+The launcher redirects the built-in Start Game action to:
 
-The script uses the standard DDLC character names (s, m, n, y) and backgrounds, so it is intended to run inside a DDLC-compatible Ren'Py project that already provides those assets and definitions.
+    label if_route_mod_start
 
-Do not redistribute DDLC's original game files with this repository.
+Press Start Game on DDLC's main menu to open the IF Route Archive.
+
+This is an unofficial fan mod. It contains original script code only and does
+not redistribute DDLC's original game files or assets.
