@@ -1,7 +1,10 @@
 # DDLC IF ROUTE MOD
-# Original fan-written route framework inspired by alternate-timeline fiction.
-# Install into the game/ directory of a compatible DDLC/Monika After Story-style
-# Ren'Py mod project or a DDLC Mod Template project.
+# Original fan-written alternate-timeline story for DDLC.
+# This file is designed to be copied directly into DDLC's game/ folder.
+
+# -----------------------------------------------------------------------------
+# Characters
+# -----------------------------------------------------------------------------
 
 define ifm_player = Character("Player")
 define ifm_m = Character("Monika")
@@ -9,9 +12,14 @@ define ifm_s = Character("Sayori")
 define ifm_n = Character("Natsuki")
 define ifm_y = Character("Yuri")
 
-default ifm_unlocked = []
+# Use persistent data so unlocked routes survive restarting the game.
+default persistent.ifm_unlocked = []
 default ifm_route = ""
 default ifm_route_active = False
+
+# -----------------------------------------------------------------------------
+# Small route indicator. It is shown only while an IF route is active.
+# -----------------------------------------------------------------------------
 
 screen ifm_route_indicator():
     if ifm_route_active and ifm_route:
@@ -24,20 +32,25 @@ screen ifm_route_indicator():
                 size 18
                 color "#ffffff"
 
-init python:
-    if "ifm_route_indicator" not in config.overlay_screens:
-        config.overlay_screens.append("ifm_route_indicator")
+# -----------------------------------------------------------------------------
+# Entry points
+# -----------------------------------------------------------------------------
+
+label if_route_mod_start:
+    jump if_route_mod
 
 label if_route_mod:
     $ ifm_route_active = False
     scene black
     with dissolve
-    centered "DDLC IF ROUTE MOD"
-    "A branching alternate-timeline fan story inspired by the IF-route concept of Re:Zero."
+    "{b}DDLC IF ROUTE MOD{/b}"
+    "A branching alternate-timeline fan story inspired by IF-route fiction."
+    "Choose a route. Your choices determine the timeline you enter."
     jump ifm_hub
 
-label if_route_mod_start:
-    jump if_route_mod
+# -----------------------------------------------------------------------------
+# Route archive
+# -----------------------------------------------------------------------------
 
 label ifm_hub:
     $ ifm_route_active = False
@@ -48,7 +61,7 @@ label ifm_hub:
     menu:
         "Start a new timeline":
             jump ifm_choose
-        "Replay an unlocked route" if len(ifm_unlocked) > 0:
+        "Replay an unlocked route" if len(persistent.ifm_unlocked) > 0:
             jump ifm_replay
         "Leave the archive":
             return
@@ -81,9 +94,15 @@ label ifm_choose:
             $ ifm_route = "School IF"
             jump ifm_school
 
+# -----------------------------------------------------------------------------
+# IF ROUTES
+# -----------------------------------------------------------------------------
+
 label ifm_pride:
     $ ifm_route_active = True
-    scene black
+    show screen ifm_route_indicator
+    scene bg residential_day
+    with dissolve
     ifm_m "You decided that losing was unacceptable."
     ifm_player "Then I'll keep going. Even if everyone tells me to stop."
     ifm_s "But what if your determination hurts someone?"
@@ -98,7 +117,9 @@ label ifm_pride:
 
 label ifm_wrath:
     $ ifm_route_active = True
-    scene black
+    show screen ifm_route_indicator
+    scene bg corridor
+    with dissolve
     ifm_player "If nobody will protect the club, I will."
     ifm_y "Protection can become another word for control."
     menu:
@@ -110,7 +131,9 @@ label ifm_wrath:
 
 label ifm_sloth:
     $ ifm_route_active = True
-    scene black
+    show screen ifm_route_indicator
+    scene bg residential_day
+    with dissolve
     ifm_s "You could just leave everything alone."
     ifm_player "Maybe that's easier."
     menu:
@@ -122,7 +145,9 @@ label ifm_sloth:
 
 label ifm_greed:
     $ ifm_route_active = True
-    scene black
+    show screen ifm_route_indicator
+    scene bg club_day
+    with dissolve
     ifm_m "You want every possibility to end the way you choose."
     ifm_player "If I plan enough, nobody has to get hurt."
     menu:
@@ -134,7 +159,9 @@ label ifm_greed:
 
 label ifm_gluttony:
     $ ifm_route_active = True
-    scene black
+    show screen ifm_route_indicator
+    scene bg club_day
+    with dissolve
     ifm_y "What makes someone themselves? Their memories? Their choices?"
     ifm_player "If I knew everything, maybe I could fix everything."
     menu:
@@ -146,7 +173,9 @@ label ifm_gluttony:
 
 label ifm_lust:
     $ ifm_route_active = True
-    scene black
+    show screen ifm_route_indicator
+    scene bg club_day
+    with dissolve
     ifm_s "What if every relationship in the club changed?"
     ifm_player "Then we'd have to learn who we are all over again."
     menu:
@@ -158,7 +187,9 @@ label ifm_lust:
 
 label ifm_vainglory:
     $ ifm_route_active = True
-    scene black
+    show screen ifm_route_indicator
+    scene bg club_day
+    with dissolve
     ifm_m "You believe you can become the answer to every problem."
     ifm_player "Someone has to be the hero."
     menu:
@@ -170,7 +201,9 @@ label ifm_vainglory:
 
 label ifm_school:
     $ ifm_route_active = True
-    scene black
+    show screen ifm_route_indicator
+    scene bg classroom
+    with dissolve
     ifm_s "Welcome to a completely different school day!"
     ifm_n "No ominous timelines. Hopefully."
     ifm_y "That sounded ominous."
@@ -181,23 +214,28 @@ label ifm_school:
             ifm_m "You noticed it too, didn't you?"
     jump ifm_finish
 
+# -----------------------------------------------------------------------------
+# Completion / replay
+# -----------------------------------------------------------------------------
+
 label ifm_finish:
-    if ifm_route not in ifm_unlocked:
-        $ ifm_unlocked.append(ifm_route)
+    if ifm_route not in persistent.ifm_unlocked:
+        $ persistent.ifm_unlocked.append(ifm_route)
+    $ persistent.ifm_unlocked = persistent.ifm_unlocked
     $ ifm_route_active = False
+    hide screen ifm_route_indicator
     scene black
     with fade
-    centered "{size=+12}[ifm_route]{/size}\n\nTIMELINE RECORDED"
+    "{size=+12}[ifm_route]{/size}"
+    "TIMELINE RECORDED"
     "Route unlocked: [ifm_route]"
-    "The choice is now saved in this playthrough."
+    "The route is now saved and can be replayed from the archive."
     jump ifm_hub
 
 label ifm_replay:
     scene black
     "Unlocked timelines:"
-    $ replay_choice = None
-    python:
-        replay_choice = renpy.display_menu([(r, r) for r in ifm_unlocked])
+    $ replay_choice = renpy.display_menu([(r, r) for r in persistent.ifm_unlocked])
     if replay_choice == "Pride IF":
         $ ifm_route = replay_choice
         jump ifm_pride
