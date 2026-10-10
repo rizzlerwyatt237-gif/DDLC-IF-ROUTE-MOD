@@ -1,14 +1,9 @@
-# IF ROUTE MOD launcher.
-# Adds a small button to the Ren'Py overlay so the route story can be started
-# without replacing DDLC's normal start label or main menu.
+# DDLC IF ROUTE MOD launcher
+# Classic DDLC / Ren'Py 6.99 compatibility.
+#
+# The classic DDLC main-menu screen doesn't reliably show config.overlay_screens.
+# Redirect its built-in Start Game action to this mod's entry label instead.
+# Remove this file to restore the original DDLC start flow.
 
 init python:
-    if "if_route_mod_launcher" not in config.overlay_screens:
-        config.overlay_screens.append("if_route_mod_launcher")
-
-screen if_route_mod_launcher():
-    if main_menu:
-        textbutton "IF ROUTE MOD":
-            xalign 0.5
-            yalign 0.94
-            action Start("if_route_mod_start")
+    config.label_overrides["start"] = "if_route_mod_start"
