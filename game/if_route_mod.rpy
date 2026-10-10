@@ -13,7 +13,7 @@ default ifm_unlocked = []
 default ifm_route = ""
 default ifm_route_active = False
 
-def screen ifm_route_indicator():
+screen ifm_route_indicator():
     if ifm_route_active and ifm_route:
         frame:
             xalign 0.015
@@ -35,6 +35,9 @@ label if_route_mod:
     centered "DDLC IF ROUTE MOD"
     "A branching alternate-timeline fan story inspired by the IF-route concept of Re:Zero."
     jump ifm_hub
+
+label if_route_mod_start:
+    jump if_route_mod
 
 label ifm_hub:
     $ ifm_route_active = False
