@@ -1,12 +1,8 @@
 # DDLC IF ROUTE MOD
 
-A Ren'Py-based DDLC fan mod inspired by the alternate-timeline / IF-route idea of **Re:Zero**.
+A Ren'Py/DDLC fan mod containing original alternate-timeline IF routes.
 
-## What this is
-
-This is an actual `.rpy` mod source project. It adds a branching IF-route story to a compatible DDLC installation without replacing DDLC's normal `start` label.
-
-### Included routes
+## Included routes
 
 - Pride IF
 - Wrath IF
@@ -17,56 +13,39 @@ This is an actual `.rpy` mod source project. It adds a branching IF-route story 
 - Vainglory IF
 - School IF
 
-Each route has choices and two possible conclusions. Completing a route records it persistently and enables the route archive.
+## Install directly from this GitHub repository
 
-## Installation
+This repository contains the mod scripts only. It does **not** redistribute DDLC's original game files.
 
-This repository is a **DDLC mod source project**, not a redistribution of DDLC itself.
-
-1. Obtain a legitimate copy of DDLC.
-2. Back up the DDLC `game` folder.
-3. Download this repository.
-4. Copy **both** files from this repository's `game/` folder into your DDLC `game/` folder:
+1. Use a legally obtained DDLC installation that supports `.rpy` mod scripts.
+2. Open DDLC's installation folder.
+3. Open its `game` folder.
+4. From this repository, open the `game` folder.
+5. Copy these two files directly into DDLC's `game` folder:
    - `if_route_mod.rpy`
    - `if_route_launcher.rpy`
-5. Start DDLC.
-6. On the DDLC main menu, look for the **IF ROUTE MOD** button near the bottom-center of the screen.
-7. Click it. The mod should begin with the IF Route introduction.
+6. Do **not** copy the entire GitHub repository folder into `DDLC/game/`.
 
-The launcher is an overlay screen, so it does not require replacing DDLC's original `script.rpy` or `start` label. Ren'Py supports overlay screens through `config.overlay_screens`. See the official Ren'Py documentation for configuration details.
+Correct layout:
 
-## How to verify it works
+```text
+DDLC/
+  game/
+    if_route_mod.rpy
+    if_route_launcher.rpy
+    ...existing DDLC files...
+```
 
-A successful installation should show **IF ROUTE MOD** on the main menu. Clicking it should show:
+## Start the mod
 
-> Something feels different today.
+The launcher adds an **IF ROUTE MOD** button to DDLC's main menu. Clicking it starts the `if_route_mod_start` label.
 
-Then choose **Follow the choice that feels right**. You should see all eight IF routes.
+The mod uses DDLC's existing character definitions/assets through its own character objects and uses DDLC background names. Route unlocks are stored with Ren'Py `persistent` data so they survive restarting the game.
 
-Choose any route, finish it, and return to the archive. The route is recorded in persistent data so it remains available after restarting the game.
+## If it still errors
 
-If the button does not appear, make sure both `.rpy` files are directly inside DDLC's `game/` folder and not inside another nested folder.
+Send the **complete Ren'Py error screen**, especially the file name, line number, and error message. Do not send only the first line; the traceback tells us exactly which GitHub script needs fixing.
 
-## Development
+## Legal / credits
 
-Main story source:
-
-`game/if_route_mod.rpy`
-
-Launcher:
-
-`game/if_route_launcher.rpy`
-
-Ren'Py compiles `.rpy` files automatically when the game starts. The project intentionally does not include DDLC or Re:Zero copyrighted game assets.
-
-## Route design
-
-The routes are separate alternate timelines rather than simply renamed versions of the seven deadly sins. The goal is to capture the *idea* of IF-route storytelling while using original fan-written scenes.
-
-## Credits
-
-DDLC is created by Team Salvato.
-
-Re:Zero is created by Tappei Nagatsuki and its respective rights holders.
-
-This is an unofficial fan project and is not affiliated with Team Salvato or the creators/rightsholders of Re:Zero.
+This is an unofficial fan project. DDLC and its original assets belong to Team Salvato. Re:Zero and its original characters/world belong to their respective rights holders. This repository contains original fan-written code and does not include their copyrighted game assets.
