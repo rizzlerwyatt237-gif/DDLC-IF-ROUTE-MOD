@@ -3,7 +3,7 @@
 # Install this file directly in DDLC's game/ directory.
 #
 # Story rule: this run does not return to a route hub. It reaches an ending
-# only when all four club girls have died or one of them kills the Player.
+# only when all four club girls have died or one of them kills MC.
 
 define ifm_player = Character("MC")
 define ifm_m = Character("Monika")
@@ -43,7 +43,6 @@ screen ifm_route_indicator():
                 text "DAY [ifm_day]  |  PRESSURE [ifm_pressure]":
                     size 11
                     color "#dddddd"
-
 
 # Display every living girl with the correct DDLC layout transform. In DDLC's
 # transforms.rpy, t11 is the one-person layout, t21/t22 are for two, t31-t33
@@ -127,9 +126,6 @@ label ifm_intro:
     scene bg classroom
     with dissolve
     call ifm_show_survivors
-
-
-
 
     ifm_m "Everyone, listen up. Something has changed about this week."
     ifm_s "It still feels like a normal school day to me."
@@ -248,9 +244,6 @@ label ifm_day1:
     scene bg club_day
     with dissolve
     call ifm_show_survivors
-
-
-
 
     ifm_m "Today, we're writing poems. No arguments, no panic, just the club."
     ifm_s "And snacks! We can't forget snacks."
